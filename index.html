@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>gEOregula — Project Control</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --bg:        #FFFBF0;
+  --bg-panel:  #FFFFFF;
+  --bg-raise:  #FBF1D4;
+  --line:      #EFDFA8;
+  --ink:       #2E3440;
+  --ink-dim:   #6B7280;
+  --ink-faint: #9B9484;
+  --gold:      #F1C332;
+  --gold-deep: #C98A1C;
+  --teal:      #2F9E8F;
+  --amber:     #E8A93D;
+  --coral:     #D64545;
+  --blue:      #3B6FE0;
+  --olive:     #8FA84E;
+  --shadow: 0 1px 2px rgba(46,52,64,0.04), 0 4px 14px rgba(46,52,64,0.05);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+.disp{font-family:'Poppins',sans-serif;}
+.mono{font-family:'JetBrains Mono',monospace;}
+
+#app{max-width:1180px;margin:0 auto;padding:28px 20px 80px;}
+
+/* ---------- Header ---------- */
+.hero{position:relative;padding:22px 26px 24px;border-radius:18px;background:
+  linear-gradient(155deg, #F4CB47 0%, #EFB730 55%, #E3A521 100%);
+  overflow:hidden; box-shadow:var(--shadow);}
+.hero-partners{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(46,32,4,0.55);text-transform:uppercase;margin-bottom:14px;position:relative;z-index:2;}
+.hero-top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;position:relative;z-index:2;}
+.hero-brand{display:flex;align-items:center;gap:16px;}
+.s4g-badge{flex-shrink:0;}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;color:rgba(46,32,4,0.62);text-transform:uppercase;margin:0 0 4px;}
+.hero h1{font-family:'Poppins',sans-serif;font-size:32px;margin:0;font-weight:800;letter-spacing:-0.01em;color:#FFFFFF;text-shadow:0 1px 2px rgba(120,80,0,0.12);}
+.hero p.sub{margin:5px 0 0;color:rgba(58,38,4,0.72);font-size:14px;font-weight:500;}
+.hero-stats{display:flex;gap:22px;flex-wrap:wrap;}
+.hstat{text-align:right;}
+.hstat .v{font-family:'JetBrains Mono',monospace;font-size:19px;font-weight:700;color:#FFFFFF;}
+.hstat .l{font-size:10.5px;color:rgba(58,38,4,0.6);text-transform:uppercase;letter-spacing:.08em;margin-top:2px;}
+.hero-globe{position:absolute;left:50%;bottom:-190px;transform:translateX(-50%);width:820px;height:380px;border-radius:50%;
+  background-image: radial-gradient(rgba(255,255,255,0.55) 1.4px, transparent 1.6px);
+  background-size:13px 13px; opacity:0.5; pointer-events:none; z-index:1;}
+
+/* ---------- Timeline strip ---------- */
+.timeline-wrap{margin-top:26px;overflow-x:auto;padding-bottom:6px;position:relative;z-index:2;}
+.timeline{display:flex;align-items:flex-start;min-width:760px;position:relative;padding-top:10px;}
+.tl-node{flex:1;position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 4px;}
+.tl-line{position:absolute;top:15px;left:0;right:0;height:2px;background:rgba(58,38,4,0.18);z-index:0;}
+.tl-line-fill{position:absolute;top:15px;left:0;height:2px;background:linear-gradient(90deg,var(--teal),#FFFFFF);z-index:1;transition:width .6s ease;}
+.tl-dot{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,0.55);border:2px solid rgba(58,38,4,0.35);z-index:2;margin-bottom:10px;position:relative;}
+.tl-dot.done{background:var(--teal);border-color:var(--teal);}
+.tl-dot.now{background:#FFFFFF;border-color:var(--coral);box-shadow:0 0 0 4px rgba(255,255,255,0.35);}
+.tl-dot.now::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:1.5px solid var(--coral);animation:pulse 2.2s infinite;}
+@keyframes pulse{0%{transform:scale(.7);opacity:.9;}100%{transform:scale(1.9);opacity:0;}}
+.tl-id{font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:700;color:#3A2604;}
+.tl-date{font-size:10.5px;color:rgba(58,38,4,0.62);margin-top:2px;}
+.tl-tag{font-size:9px;letter-spacing:.05em;margin-top:4px;padding:1px 6px;border-radius:20px;text-transform:uppercase;}
+.tl-tag.pay{background:rgba(255,255,255,0.55);color:#1F6E62;}
+.tl-tag.est{background:rgba(58,38,4,0.12);color:rgba(58,38,4,0.68);}
+
+/* ---------- Today marker line ---------- */
+.today-note{margin-top:14px;font-size:12.5px;color:rgba(58,38,4,0.68);display:flex;align-items:center;gap:8px;position:relative;z-index:2;}
+.today-dot{width:7px;height:7px;border-radius:50%;background:var(--coral);}
+
+/* ---------- Clock bar ---------- */
+.clock-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-top:18px;padding:12px 16px;background:var(--bg-panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);}
+.clock-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.clock-label{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-faint);}
+.clock-btn{background:var(--bg-raise);border:1px solid var(--line);color:var(--ink-dim);border-radius:8px;padding:6px 12px;font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;transition:.15s;}
+.clock-btn:hover{color:var(--gold-deep);border-color:var(--gold-deep);}
+.clock-note{font-size:12px;color:var(--ink-dim);}
+.clock-note.shifted{color:#9C6B12;}
+
+/* ---------- Tabs ---------- */
+.tabs{display:flex;gap:6px;margin:30px 0 18px;border-bottom:1px solid var(--line);flex-wrap:wrap;}
+.tab{background:none;border:none;color:var(--ink-dim);font-family:'Inter',sans-serif;font-size:14px;font-weight:600;padding:10px 16px;cursor:pointer;border-bottom:2px solid transparent;transition:.15s;}
+.tab:hover{color:var(--ink);}
+.tab.active{color:var(--gold-deep);border-bottom-color:var(--gold-deep);}
+
+.panel{display:none;}
+.panel.active{display:block;animation:fade .25s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+/* ---------- Overview cards ---------- */
+.grid-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-bottom:24px;}
+.card{background:var(--bg-panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow);}
+.card .k{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-faint);margin-bottom:8px;}
+.card .v{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:600;}
+.card .d{font-size:12.5px;color:var(--ink-dim);margin-top:4px;}
+.card.accent-teal .v{color:var(--teal);}
+.card.accent-amber .v{color:#9C6B12;}
+.card.accent-coral .v{color:var(--coral);}
+
+.section-title{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:600;margin:26px 0 12px;display:flex;align-items:center;gap:8px;}
+.section-title .n{color:var(--ink-faint);font-family:'JetBrains Mono',monospace;font-size:12px;}
+
+/* ---------- Filters ---------- */
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+select, input[type=text]{background:var(--bg-raise);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:7px 10px;font-family:'Inter',sans-serif;font-size:13px;}
+select:focus, input:focus{outline:1px solid var(--teal);}
+
+/* ---------- Deliverables table ---------- */
+.dtable{width:100%;border-collapse:separate;border-spacing:0 8px;}
+.dtable thead th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);padding:0 12px 4px;font-weight:600;}
+.dtable tbody tr{background:var(--bg-panel);box-shadow:var(--shadow);}
+.dtable tbody tr td{padding:12px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+.dtable tbody tr td:first-child{border-left:1px solid var(--line);border-radius:10px 0 0 10px;}
+.dtable tbody tr td:last-child{border-right:1px solid var(--line);border-radius:0 10px 10px 0;}
+.did{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:12.5px;color:var(--blue);}
+.dname{font-weight:600;font-size:13.5px;}
+.ddesc{font-size:11.5px;color:var(--ink-faint);margin-top:2px;}
+.dtag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:20px;background:var(--bg-raise);color:var(--ink-dim);margin-right:4px;font-family:'JetBrains Mono',monospace;}
+.ddue{font-family:'JetBrains Mono',monospace;font-size:12.5px;}
+.badge{font-size:10.5px;padding:2px 8px;border-radius:20px;font-weight:600;letter-spacing:.02em;white-space:nowrap;}
+.badge.overdue{background:rgba(214,69,69,0.13);color:var(--coral);}
+.badge.soon{background:rgba(232,169,61,0.18);color:#9C6B12;}
+.badge.ok{background:rgba(107,114,128,0.10);color:var(--ink-dim);}
+.status-select{width:100%;max-width:150px;}
+textarea.notes{background:var(--bg-raise);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:6px 8px;font-family:'Inter',sans-serif;font-size:12px;width:100%;min-height:34px;resize:vertical;}
+
+/* ---------- WP cards ---------- */
+.phase-block{margin-bottom:22px;}
+.phase-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.phase-dot{width:9px;height:9px;border-radius:50%;}
+.phase-name{font-weight:700;font-size:14px;}
+.phase-range{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--ink-faint);}
+.wp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;}
+.wp-card{background:var(--bg-panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow);}
+.wp-expandable{cursor:pointer;transition:border-color .15s;}
+.wp-expandable:hover{border-color:var(--blue);}
+.wp-changed{font-size:9px;text-transform:uppercase;letter-spacing:.05em;background:rgba(232,169,61,0.20);color:#9C6B12;padding:1px 6px;border-radius:20px;margin-left:6px;vertical-align:middle;}
+.wp-changed-note{font-size:11px;color:#9C6B12;margin-top:6px;line-height:1.4;}
+.wp-detail{display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:11.5px;color:var(--ink-dim);}
+.wp-expandable.open .wp-detail{display:block;}
+.wp-detail-h{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);margin-bottom:4px;margin-top:8px;}
+.wp-detail-h:first-child{margin-top:0;}
+.wp-detail ul{margin:0 0 4px;padding-left:16px;}
+.wp-detail li{margin-bottom:3px;line-height:1.35;}
+.wp-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
+.wp-id{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-faint);}
+.wp-hours{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-faint);}
+.wp-title{font-weight:600;font-size:13.5px;margin:4px 0 8px;line-height:1.3;}
+.wp-meta{font-size:11.5px;color:var(--ink-dim);display:flex;justify-content:space-between;margin-top:8px;border-top:1px solid var(--line);padding-top:8px;}
+.wp-manager{font-weight:600;color:var(--ink);}
+
+/* ---------- Team ---------- */
+.team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;}
+.team-card{background:var(--bg-panel);border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:var(--shadow);}
+.team-card .name{font-weight:700;font-size:14.5px;}
+.team-card .role{font-size:12px;color:var(--teal);margin-top:2px;}
+.bar-bg{background:var(--bg-raise);border-radius:6px;height:6px;margin-top:10px;overflow:hidden;}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--teal));}
+.team-card .pct{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-faint);margin-top:4px;}
+
+footer{margin-top:40px;font-size:11.5px;color:var(--ink-faint);border-top:1px solid var(--line);padding-top:16px;line-height:1.6;}
+
+/* ---------- Monthly activities ---------- */
+.month-nav{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
+.month-nav select{font-family:'JetBrains Mono',monospace;font-size:13.5px;font-weight:600;padding:8px 12px;min-width:200px;}
+.month-empty{padding:30px;text-align:center;color:var(--ink-dim);font-size:13.5px;background:var(--bg-panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);}
+.mo-card{background:var(--bg-panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:12px;box-shadow:var(--shadow);}
+.mo-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;}
+.mo-title-row{display:flex;align-items:center;gap:8px;}
+.mo-phase-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.mo-id{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--ink-faint);}
+.mo-title{font-weight:700;font-size:14.5px;margin-top:2px;}
+.mo-manager{font-size:12px;color:var(--ink-dim);margin-top:2px;}
+.mo-status-select{min-width:130px;}
+.mo-body{display:grid;grid-template-columns:1.3fr 1fr;gap:18px;margin-top:12px;}
+@media (max-width:760px){.mo-body{grid-template-columns:1fr;}}
+.mo-h{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);margin-bottom:6px;}
+.mo-checklist{display:flex;flex-direction:column;gap:6px;}
+.mo-check-row{display:flex;align-items:flex-start;gap:8px;font-size:12.5px;color:var(--ink-dim);line-height:1.4;}
+.mo-check-row input[type=checkbox]{margin-top:2px;width:15px;height:15px;accent-color:var(--gold-deep);cursor:pointer;flex-shrink:0;}
+.mo-task-text{cursor:pointer;transition:color .15s;}
+.mo-task-text:hover{color:var(--gold-deep);}
+.mo-check-done{text-decoration:line-through;color:var(--ink-faint);}
+.mo-task-bold{font-weight:700;color:var(--ink);}
+.recap-empty{padding:20px;text-align:center;color:var(--ink-dim);font-size:13px;background:var(--bg-panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);}
+.recap-item{display:flex;align-items:baseline;gap:10px;background:var(--bg-panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:8px;box-shadow:var(--shadow);}
+.recap-wp{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold-deep);font-weight:700;flex-shrink:0;}
+.recap-text{font-weight:700;color:var(--ink);font-size:13px;}
+.mo-people{display:flex;flex-direction:column;gap:6px;}
+.mo-person{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;background:var(--bg-raise);border-radius:8px;padding:6px 10px;}
+.mo-person .pname{font-weight:600;color:var(--ink);}
+.mo-person .prole{font-size:10.5px;color:var(--ink-faint);}
+.mo-person .phrs{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--ink-dim);}
+
+/* ---------- Gantt ---------- */
+.gantt-legend{display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--ink-dim);}
+.gantt-legend .item{display:flex;align-items:center;gap:6px;}
+.gantt-legend .sw{width:10px;height:10px;border-radius:3px;}
+.gantt-scroll{overflow-x:auto;padding-bottom:10px;}
+.gantt-inner{min-width:920px;position:relative;padding-bottom:6px;}
+.gantt-scale{display:flex;position:relative;height:24px;margin-left:230px;border-bottom:1px solid var(--line);margin-bottom:4px;}
+.gantt-tick{position:absolute;top:0;bottom:0;border-left:1px solid var(--line);}
+.gantt-tick span{position:absolute;top:2px;left:5px;font-size:9.5px;color:var(--ink-faint);font-family:'JetBrains Mono',monospace;white-space:nowrap;}
+.gantt-milestones{position:absolute;top:26px;left:230px;right:0;bottom:0;pointer-events:none;z-index:1;}
+.gantt-mline{position:absolute;top:0;bottom:0;width:1px;background:var(--amber);opacity:.45;}
+.gantt-mline.fixed-past{background:var(--teal);}
+.gantt-mlabel{position:absolute;top:-1px;font-size:9px;color:#9C6B12;font-family:'JetBrains Mono',monospace;transform:translateX(-50%);white-space:nowrap;background:var(--bg);padding:0 3px;}
+.gantt-phase-row{display:flex;align-items:center;height:24px;margin-top:12px;position:relative;z-index:2;}
+.gantt-phase-row:first-of-type{margin-top:2px;}
+.gantt-phase-label{width:230px;flex-shrink:0;font-weight:700;font-size:12px;display:flex;align-items:center;gap:8px;}
+.gantt-phase-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.gantt-row{display:flex;align-items:center;height:30px;position:relative;z-index:2;}
+.gantt-label{width:230px;flex-shrink:0;font-size:11.5px;padding-right:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink-dim);}
+.gantt-label .id{font-family:'JetBrains Mono',monospace;color:var(--ink-faint);margin-right:6px;font-size:10.5px;}
+.gantt-track{flex:1;position:relative;height:16px;background:var(--bg-raise);border-radius:4px;}
+.gantt-bar{position:absolute;top:1px;bottom:1px;border-radius:4px;opacity:.88;}
+.gantt-bar:hover{opacity:1;}
+
+@media (max-width:640px){
+  .hero h1{font-size:24px;}
+  .hstat{text-align:left;}
+  .hero-stats{gap:16px;}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div class="hero">
+    <div class="hero-partners">European Space Agency · Netherlands Space Agency · Space4Good</div>
+    <div class="hero-top">
+      <div class="hero-brand">
+        <svg class="s4g-badge" width="58" height="58" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="46" fill="none" stroke="#FFFFFF" stroke-opacity="0.85" stroke-width="1.6" stroke-dasharray="2.2 3.4"/>
+          <path d="M50 30c-7.2 0-13 5.8-13 13 0 9.5 13 24 13 24s13-14.5 13-24c0-7.2-5.8-13-13-13z" fill="#FFFFFF"/>
+          <circle cx="50" cy="43" r="5" fill="#EFB730"/>
+          <text x="50" y="72" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="7.5" letter-spacing="0.5" fill="#FFFFFF" font-weight="600">SPACE4GOOD</text>
+        </svg>
+        <div>
+          <p class="eyebrow">ESA Business Applications · AO10494</p>
+          <h1 class="disp">gEOregula</h1>
+          <p class="sub">Space4Good B.V. (NL) · Ref. ESA-TIAA-PR-2020-2114 · Firm Fixed Price</p>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="hstat"><div class="v mono" id="stat-nextname">–</div><div class="l">Next review</div></div>
+        <div class="hstat"><div class="v mono" id="stat-nextdays">–</div><div class="l">Days out</div></div>
+        <div class="hstat"><div class="v mono">€299,760</div><div class="l">ESA funding</div></div>
+      </div>
+    </div>
+    <div class="timeline-wrap">
+      <div class="timeline" id="timeline"></div>
+    </div>
+    <div class="today-note"><span class="today-dot"></span><span id="today-label"></span></div>
+    <div class="hero-globe"></div>
+  </div>
+
+  <div class="clock-bar">
+    <div class="clock-left">
+      <span class="clock-label">Dashboard clock</span>
+      <input type="date" id="clock-input">
+      <button class="clock-btn" id="clock-today">Reset to today</button>
+    </div>
+    <div class="clock-note" id="clock-note"></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="overview">Overview</button>
+    <button class="tab" data-tab="deliverables">Deliverables</button>
+    <button class="tab" data-tab="workpackages">Work Packages</button>
+    <button class="tab" data-tab="gantt">Gantt Chart</button>
+    <button class="tab" data-tab="monthly">Monthly Activities</button>
+    <button class="tab" data-tab="team">Team</button>
+  </div>
+
+  <div class="panel active" id="panel-overview">
+    <div class="grid-cards" id="overview-cards"></div>
+    <div class="section-title">Milestone payment plan <span class="n">— signed contract</span></div>
+    <div class="wp-grid" id="payment-cards"></div>
+    <div class="section-title">Upcoming in the next 60 days</div>
+    <div id="upcoming-list"></div>
+  </div>
+
+  <div class="panel" id="panel-deliverables">
+    <div class="filters">
+      <input type="text" id="d-search" placeholder="Search deliverables…">
+      <select id="d-filter-milestone"><option value="">All milestones</option></select>
+      <select id="d-filter-status">
+        <option value="">All statuses</option>
+        <option>Not started</option><option>In progress</option><option>Submitted</option><option>Approved</option>
+      </select>
+    </div>
+    <table class="dtable">
+      <thead><tr><th style="width:24%">Deliverable</th><th style="width:14%">Due at</th><th style="width:12%">Due date</th><th style="width:16%">Cadence</th><th style="width:14%">Status</th><th>Notes</th></tr></thead>
+      <tbody id="d-tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="panel" id="panel-workpackages">
+    <div id="wp-container"></div>
+  </div>
+
+  <div class="panel" id="panel-gantt">
+    <div class="filters">
+      <div class="gantt-legend" id="gantt-legend"></div>
+    </div>
+    <div class="gantt-scroll">
+      <div class="gantt-inner" id="gantt-inner"></div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-monthly">
+    <div class="month-nav">
+      <button class="clock-btn" id="month-prev">‹ Prev</button>
+      <select id="month-select"></select>
+      <button class="clock-btn" id="month-next">Next ›</button>
+    </div>
+    <div class="grid-cards" id="monthly-stats"></div>
+    <div id="monthly-wp-list"></div>
+    <div class="section-title">This month's highlighted activities <span class="n">— click any activity to highlight it here</span></div>
+    <div id="monthly-recap"></div>
+  </div>
+
+  <div class="panel" id="panel-team">
+    <div class="team-grid" id="team-container"></div>
+  </div>
+
+  <footer>
+    Kick-off is confirmed for 7 September 2026, 11:00. Work package schedules and review-only milestone (BDR) dates reflect the revised WPDs (Aug 2026), rebased against that kick-off date. <strong>Flag:</strong> the signed contract's Milestone Payment Plan schedules payments on the 3rd of each month (03/03/2027, 03/07/2027, 03/05/2028, 03/08/2028) — consistent with a 3 September 2026 kick-off, not 7 September. This is the second document to imply KOM = 3 Sep rather than 7 Sep. If the kick-off is actually the 3rd, let me know and I'll rebase the whole schedule again. Payment amounts and dates for CDR, FAT, SAT and the Final Settlement are now taken directly from the signed contract's Milestone Payment Plan (superseding the proposal's provisional BDR/FAT/FR structure) — these are fixed, not estimates. The €104,916 advance payment is a prepayment recouped against MS1–MS3, not additional funding on top of the €299,760 total. Deliverable statuses, notes, checkboxes and the dashboard clock are saved in this browser only (localStorage). They are not shared between people or devices.
+  </footer>
+
+</div>
+
+<script>
+/* ---------- Storage shim ----------
+   Inside Claude the page has window.storage. On GitHub Pages (or any normal host)
+   it does not, so fall back to the browser's localStorage. Same get/set/delete API. */
+if(!window.storage){
+  window.storage = {
+    async get(key){
+      try{ const v = localStorage.getItem(key); return v===null ? null : {key, value:v}; }
+      catch(e){ return null; }
+    },
+    async set(key, value){
+      try{ localStorage.setItem(key, value); return {key, value}; }
+      catch(e){ return null; }
+    },
+    async delete(key){
+      try{ localStorage.removeItem(key); return {key, deleted:true}; }
+      catch(e){ return null; }
+    }
+  };
+}
+/* ================= DATA ================= */
+
+const MILESTONES = [
+  {id:'NM',  name:'Negotiation Meeting', date:'2026-03-18', est:false, payment:null, note:'Meeting 0 — contract negotiation with ESA. Historical, unaffected by later schedule changes.'},
+  {id:'KOM', name:'Kick-off (T0)',       date:'2026-09-07', time:'11:00', est:false, payment:null, note:'Confirmed — KO moved to 7 September 2026, 11:00.'},
+  {id:'BDR', name:'Baseline Design Review', date:'2026-12-07', est:true, payment:null, note:"No payment attached in the signed contract's Milestone Payment Plan — BDR is a review-only milestone. Date rebased at KOM+3 months per the revised WPDs; not stated directly in the contract."},
+  {id:'CDR', name:'Critical Design Review', date:'2027-03-03', est:false, payment:89928, offset:59952, note:'MS1 — Progress payment upon successful CDR completion and ESA acceptance of related deliverables. Fixed date from the signed Milestone Payment Plan.'},
+  {id:'FAT', name:'Factory Acceptance Test', date:'2027-07-03', est:false, payment:69944, offset:22482, note:'MS2 — Progress payment upon successful FAT completion and ESA acceptance of related deliverables. Fixed date from the signed Milestone Payment Plan.'},
+  {id:'SAT', name:'Site Acceptance Test', date:'2028-05-03', est:false, payment:94924, offset:22482, note:'MS3 — Progress payment upon successful SAT completion and ESA acceptance of related deliverables. Fixed date from the signed Milestone Payment Plan.'},
+  {id:'FR',  name:'Final Settlement',    date:'2028-08-03', est:false, payment:44964, offset:0, note:'MS4 — Final Settlement upon ESA acceptance of all deliverable items and evidence of the co-funded element. Fixed date from the signed Milestone Payment Plan. Marks project closure.'}
+];
+
+const ADVANCE_PAYMENT = {
+  amount: 104916,
+  date: '2026-09-07',
+  note: 'Paid upon signature of the Contract by both parties. Recouped against MS1 (€59,952), MS2 (€22,482) and MS3 (€22,482) below — this is a prepayment, not additional funding on top of the €299,760 contract total.'
+};
+
+// deliverable due date resolves to a milestone id, or a fixed date for recurring items
+function msDate(id){ return MILESTONES.find(m=>m.id===id).date; }
+
+const DELIVERABLES = [
+  {id:'PBC', name:'Project Bar Chart', cat:'Report', due:'KOM (proposal)', dueDate: msDate('NM'), cadence:'Submitted with proposal; updated with each MPR and at every review', defaultStatus:'Submitted'},
+  {id:'MPR', name:'Monthly Progress Report', cat:'Report', due:'T0+1 month, then monthly', dueDate:'2026-10-07', cadence:'Every month, within first 5 working days', defaultStatus:'Not started'},
+  {id:'MOM', name:'Minutes of Meeting', cat:'Report', due:'Every review meeting', dueDate: msDate('NM'), cadence:'At every meeting (NM, BDR, CDR, FAT, SAT, FR)', defaultStatus:'Submitted'},
+  {id:'RD', name:'Requirements Document', cat:'Report', due:'With proposal → BDR', dueDate: msDate('BDR'), cadence:'Initial with proposal; updated at BDR', defaultStatus:'Submitted'},
+  {id:'SSA', name:'System & Service Architecture', cat:'Report', due:'With proposal → BDR, CDR', dueDate: msDate('CDR'), cadence:'Initial with proposal; updated at BDR and CDR', defaultStatus:'Submitted'},
+  {id:'PilUP', name:'Pilot-Demonstration Utilisation Plan', cat:'Report', due:'With proposal → FAT, SAT', dueDate: msDate('FAT'), cadence:'Initial with proposal; updated at FAT and SAT', defaultStatus:'Submitted'},
+  {id:'BP', name:'Business Plan', cat:'Report', due:'With proposal → BDR, other milestones', dueDate: msDate('BDR'), cadence:'Initial with proposal; updated at BDR and other milestones as relevant', defaultStatus:'Submitted'},
+  {id:'SVD', name:'System Verification Document', cat:'Report', due:'CDR → FAT, SAT', dueDate: msDate('CDR'), cadence:'Initial at CDR; updated at FAT and SAT', defaultStatus:'Not started'},
+  {id:'PWP', name:'Project Web Page', cat:'Report', due:'BDR', dueDate: msDate('BDR'), cadence:'Initial at BDR; status paragraph updated with each MPR', defaultStatus:'Not started'},
+  {id:'POSR', name:'Pilot Operations Summary Report', cat:'Report', due:'SAT, then biweekly', dueDate: msDate('SAT'), cadence:'Every two weeks after SAT unless agreed otherwise with ESA', defaultStatus:'Not started'},
+  {id:'DM', name:'Digital Media', cat:'Report', due:'FR (part of FDP)', dueDate: msDate('FR'), cadence:'Once, at FR', defaultStatus:'Not started'},
+  {id:'FREP', name:'Final Report', cat:'Report', due:'FR', dueDate: msDate('FR'), cadence:'Once, at FR', defaultStatus:'Not started'},
+  {id:'FDP', name:'Final Data Package', cat:'Report', due:'FR', dueDate: msDate('FR'), cadence:'Once, at FR', defaultStatus:'Not started'},
+  {id:'S&A', name:'Summary and Achievements', cat:'Report', due:'FR', dueDate: msDate('FR'), cadence:'Once, at FR', defaultStatus:'Not started'},
+  {id:'SSP', name:'Single Slide Presentation', cat:'Report', due:'FR', dueDate: msDate('FR'), cadence:'Once, at FR', defaultStatus:'Not started'},
+  {id:'SW.01', name:'RS-based Deforestation Pipeline', cat:'Software', due:'FR', dueDate: msDate('FR'), cadence:'Delivered via secure repository, once at FR', defaultStatus:'Not started'},
+  {id:'SW.02', name:'RS-based Biodiversity Pipeline', cat:'Software', due:'FR', dueDate: msDate('FR'), cadence:'Delivered via secure repository, once at FR', defaultStatus:'Not started'},
+  {id:'SW.03', name:'RS-based Biomass Pipeline', cat:'Software', due:'FR', dueDate: msDate('FR'), cadence:'Delivered via secure repository, once at FR (proposal table labels this SW.02 too — likely a typo; treated as a distinct item here)', defaultStatus:'Not started'},
+  {id:'SW.04', name:'gEOregula Tool', cat:'Software', due:'FR', dueDate: msDate('FR'), cadence:'Delivered via secure repository, once at FR', defaultStatus:'Not started'},
+  {id:'DOC.01', name:'High Fidelity Mock-Up', cat:'Manual', due:'BDR', dueDate: msDate('BDR'), cadence:'Once, at BDR', defaultStatus:'Not started'},
+  {id:'DOC.02', name:'Software Tool User Manual', cat:'Manual', due:'FR', dueDate: msDate('FR'), cadence:'Once, at FR', defaultStatus:'Not started'}
+];
+
+const PHASES = [
+  {key:'1000', name:'Coordination & Reporting', color:'var(--blue)', wps:['WP1100','WP1200','WP1300']},
+  {key:'2000', name:'Business Case', color:'var(--amber)', wps:['WP2100','WP2200','WP2300']},
+  {key:'3000', name:'Co-design & Pilot', color:'var(--teal)', wps:['WP3100','WP3200','WP3300']},
+  {key:'4000', name:'Commercial Strategy', color:'var(--amber)', wps:['WP4100','WP4200','WP4300','WP4400']},
+  {key:'5000', name:'Technical Development', color:'var(--olive)', wps:['WP5100','WP5200','WP5300','WP5400']},
+  {key:'6000', name:'Validation', color:'var(--coral)', wps:['WP6100','WP6200','WP6300']},
+  {key:'7000', name:'Exploitation & Dissemination', color:'var(--blue)', wps:['WP7100','WP7200','WP7300','WP7400']}
+];
+
+const WORK_PACKAGES = {
+  WP1100:{title:'Coordination, governance, contractual and financial management', manager:'Alexander Gunkel', start:'2026-09-07', end:'2028-09-07', startLabel:'KOM', endLabel:'FR', hours:400,
+    tasks:['Coordinate activities with the internal team','Monthly coordination meetings','Liaise with ESA & arrange meetings','Budget tracking via harvesting tool (burn rate, forecasts)','Contract and amendment management (if required)','Milestone planning','Co-funding arrangement'],
+    outputs:['Meeting minutes (MOM)','Financial dashboards and part of Final Report (FREP)','Periodic cost statements','Co-Funding Confirmation Arrangement (CFCA)']},
+  WP1200:{title:'Risk monitoring, mitigation, quality assurance and reviews', manager:'Federico Franciamore', start:'2026-09-07', end:'2028-09-07', startLabel:'KOM', endLabel:'FR', hours:320,
+    tasks:['Maintain live risk log','Define mitigation actions','Quality Control of Deliverables','Conduct internal QA reviews before milestones','Coordinate Summary and Achievements Document'],
+    outputs:['Updated risk register','Mitigation reports','Oversight for RD, SSA, SVD, PilUP, Final Data Package','Review reports (BDR, CDR, FAT, SAT)']},
+  WP1300:{title:'Reporting', manager:'Federico Franciamore', start:'2026-09-07', end:'2028-09-07', startLabel:'KOM', endLabel:'FR', hours:880,
+    tasks:['Coordinate documentation preparation with internal team','Compile milestone reports','Ensure consistency with ESA requirements','Upload documentation via SharePoint Project Workspace','Prepare & amend deliverables per Table F.1a'],
+    outputs:['Updated Project Bar Chart (PBC)','Monthly Progress Report (MPR)','First version of Project Web Page (PWP)','Final Report (FREP)','Full ESA documentation per templates','Final Data Package']},
+  WP2100:{title:'Expansion of market analysis, business case and pricing model', manager:'Mathieu Aillerie', start:'2026-09-07', end:'2027-03-07', startLabel:'KOM', endLabel:'CDR', hours:360,
+    tasks:['Quantify TAM/SAM/SOM','Define revenue scenarios','Cost structure modelling','Pricing sensitivity analysis'],
+    outputs:['Updated Business Plan (BP)','Market sizing report','Detailed business case (3–5 year projections)','Preliminary pricing model (BDR → CDR)','Part of Final Report (FREP)']},
+  WP2200:{title:'Customer segments prioritization and validation', manager:'Mathieu Aillerie', start:'2026-09-07', end:'2027-03-07', startLabel:'KOM', endLabel:'CDR', hours:260,
+    tasks:['Customer personas identification','15–25 stakeholder interviews','Surveys','Use-case validation workshops'],
+    outputs:['Validated customer personas','Prioritized segments','Documented user needs (BDR → CDR)']},
+  WP2300:{title:'Competitive analysis', manager:'Mathieu Aillerie', start:'2026-09-07', end:'2027-03-07', startLabel:'KOM', endLabel:'CDR', hours:260,
+    tasks:['Feature comparison matrix','Detailed SWOT analysis','Gap identification'],
+    outputs:['Competitive positioning map','Differentiation strategy (BDR → CDR)']},
+  WP3100:{title:'Stakeholder engagement, co-design, data collection and AI-based chatbot', manager:'Federico Franciamore', start:'2026-09-07', end:'2027-03-07', startLabel:'KOM', endLabel:'CDR', hours:440,
+    tasks:['Co-design workshops','Define user journeys','Collect pilot datasets','Develop AI chatbot prototype for user interaction'],
+    outputs:['Functional requirements document (RD)','Stakeholder engagement report','Chatbot prototype (BDR → CDR)'],
+    changed:'Now starts at KOM instead of KOM+3 months.'},
+  WP3200:{title:'Process presentation, mock-ups and roadmap', manager:'Federico Franciamore', start:'2026-09-07', end:'2027-03-07', startLabel:'KOM', endLabel:'CDR', hours:160,
+    tasks:['Design system workflows','UI/UX mock-ups','Further define technical architecture','Refine the roadmap development'],
+    outputs:['High fidelity clickable mock-ups, part of FDP (DOC.01)','2 updated SSA versions (BDR and CDR)','Product roadmap (CDR)'],
+    changed:'Now starts at KOM instead of KOM+3 months.'},
+  WP3300:{title:'Pilot execution, evaluation and feedback incorporation', manager:'Federico Franciamore', start:'2026-12-07', end:'2028-05-07', startLabel:'KOM+3mo', endLabel:'SAT', hours:360,
+    tasks:['Revise & detail T&Cs for pilot operations (PilUP)','Revise pilot planning summary with dates (PilUP)','Detail assessment process & KPIs (PilUP)','Alert pilot client & obtain signed Agreement','Provide POSR delivery method (KPIs/dashboard)','Monitor pilot operations & outcomes','Track KPIs via POSR/PilUP','Check-ins with users','Communicate progress to users, team and ESA','Alert on delays/underperformance','Visual documentation for Digital Media (DM)'],
+    outputs:['2 updated PilUP versions (FAT and SAT)','Signed Agreement Contract with pilot commitments','Update to POSR'],
+    changed:'Now runs KOM+3 → SAT (17 months) instead of ending at CDR — pilot execution now spans almost the whole project.'},
+  WP4100:{title:'Commercial positioning and sales & partnership strategy', manager:'Mathieu Aillerie', start:'2027-09-07', end:'2028-03-07', startLabel:'FAT+2mo', endLabel:'SAT-2mo', hours:320,
+    tasks:['Define value proposition per segment','Identify and strengthen key partners (carbon standards, data providers)','Partnership outreach'],
+    outputs:['Commercial strategy document and Business Plan updates','Partnership strategy pipeline']},
+  WP4200:{title:'Pricing and packaging refinement, pilot incentives', manager:'Mathieu Aillerie', start:'2027-09-07', end:'2028-03-07', startLabel:'FAT+2mo', endLabel:'SAT-2mo', hours:140,
+    tasks:['Test pricing with pilot users','Define subscription tiers (per hectare/report/API)','Design pilot incentives'],
+    outputs:['Final pricing scheme','Packaging structure','Part of Final Report (FREP)']},
+  WP4300:{title:'Customer acquisition approach', manager:'Mathieu Aillerie', start:'2027-09-07', end:'2028-03-07', startLabel:'FAT+2mo', endLabel:'SAT-2mo', hours:160,
+    tasks:['Define sales funnel','Outreach campaigns','Lead qualification process'],
+    outputs:['Customer acquisition plan','CRM pipeline structure (CDR → FAT)']},
+  WP4400:{title:'Preparation of sales and marketing materials', manager:'Federico Franciamore', start:'2027-09-07', end:'2028-03-07', startLabel:'FAT+2mo', endLabel:'SAT-2mo', hours:60,
+    tasks:['Create pitch decks','Create one-pagers','Create demo videos','Create website content'],
+    outputs:['Sales kit','Communication materials','Digital Media (DM)','Update to Project Web Page (PWP)']},
+  WP5100:{title:'Adaptation and optimization of EO and GIS modules', manager:'Lisa Browkhuizen', start:'2027-03-07', end:'2028-01-07', startLabel:'CDR', endLabel:'SAT-5mo', hours:260,
+    tasks:['Improve AGB models','Optimize data pipelines','Automate preprocessing'],
+    outputs:['Optimized EO/GIS modules with documented performance metrics (FDP)']},
+  WP5200:{title:'Integration of biomass, deforestation and biodiversity components', manager:'Ramadhan', start:'2027-03-07', end:'2028-01-07', startLabel:'CDR', endLabel:'SAT-5mo', hours:200,
+    tasks:['Integration of the 3 main tech pipelines','API integration','Harmonization of outputs','Unified data schema'],
+    outputs:['Integrated processing engine (FDP)','Harmonized models (FDP)']},
+  WP5300:{title:'Performance and scalability improvements', manager:'Victor Del Val', start:'2027-03-07', end:'2028-01-07', startLabel:'CDR', endLabel:'SAT-5mo', hours:180,
+    tasks:['Load testing','Runtime optimization','Cost-efficiency improvements'],
+    outputs:['Scalable cloud architecture','Performance benchmarks','Contributions to System Verification Document (SVD)']},
+  WP5400:{title:'Implementation of pilot feedback and deployment', manager:'Liliana Gonzalez', start:'2027-03-07', end:'2028-01-07', startLabel:'CDR', endLabel:'SAT-5mo', hours:200,
+    tasks:['Evaluate pilot outcomes with internal team & client','Draft summary of pilot results & integrate into PilUP/dissemination','Prepare Summary & Achievements document','Contribute to Final Report (FREP)','Prepare final data package (incl. digital media)','Cross-reference pilot evaluation with commercial roll-out'],
+    outputs:['Finalized PilUP with results','Final POSR with results','Part of Final Report (FREP)']},
+  WP6100:{title:'Validation against user expectations and KPIs', manager:'Federico Franciamore', start:'2027-04-07', end:'2028-05-07', startLabel:'CDR+1mo', endLabel:'SAT', hours:140,
+    tasks:['Compare outputs vs targets (accuracy, cost, time)','Validate usability'],
+    outputs:['KPI validation report','Final Summary and Achievements document','Part of Final Report (FREP)']},
+  WP6200:{title:'Structured user and stakeholder feedback collection', manager:'Liliana Gonzalez', start:'2027-04-07', end:'2028-05-07', startLabel:'CDR+1mo', endLabel:'SAT', hours:100,
+    tasks:['Creation of ad hoc surveys','Interviews','Usability testing sessions'],
+    outputs:['2 updated System Verification Document versions (FAT and SAT)','Feedback database','Insights integrated into Final Report (FREP)']},
+  WP6300:{title:'Demonstration of operational and regulatory value', manager:'Federico Franciamore', start:'2027-04-07', end:'2028-05-07', startLabel:'CDR+1mo', endLabel:'SAT', hours:140,
+    tasks:['Validate alignment with carbon standards and regulatory frameworks','Quantify benefits from stakeholders'],
+    outputs:['Regulatory compliance report','Part of Final Report (FREP)']},
+  WP7100:{title:'Preparation of case studies and success stories', manager:'Federico Franciamore', start:'2028-03-07', end:'2028-09-07', startLabel:'SAT-2mo', endLabel:'FR', hours:80,
+    tasks:['Document use cases','Quantify impact (time saved, accuracy gains)'],
+    outputs:['2–4 case studies','Material for Project Web Page (PWP)','Part of Final Report (FREP)']},
+  WP7200:{title:'Dissemination, events and targeted outreach', manager:'Federico Franciamore', start:'2028-03-07', end:'2028-09-07', startLabel:'SAT-2mo', endLabel:'FR', hours:100,
+    tasks:['Ad hoc webinars','Participation in sectorial events and conferences','Publications for scientific journals and/or white papers'],
+    outputs:['Dissemination reports','Event participation','Summary and Achievements (S&A)','Single Slide Presentation (SSP)']},
+  WP7300:{title:'Engagement with potential customers and partners', manager:'Mathieu Aillerie', start:'2028-03-07', end:'2028-09-07', startLabel:'SAT-2mo', endLabel:'FR', hours:140,
+    tasks:['Demos','Bilateral meetings','Proposal discussions'],
+    outputs:['Signed MoUs','Partnership agreements (FAT → FR)']},
+  WP7400:{title:'Exploitation plan and market roll-out', manager:'Mathieu Aillerie', start:'2028-03-07', end:'2028-09-07', startLabel:'SAT-2mo', endLabel:'FR', hours:260,
+    tasks:['Define go-to-market plan','Scaling strategy','Investment needs'],
+    outputs:['Exploitation plan, launch roadmap','Final Report (FREP) with roll-out strategy']}
+};
+
+const TEAM = [
+  {name:'Alexander Gunkel', role:'Contract Manager', pct:22},
+  {name:'Federico Franciamore', role:'Project Manager', pct:54},
+  {name:'Mathieu Aillerie', role:'Business Lead', pct:42},
+  {name:'Lisa Browkhuizen', role:'Technical Lead & Analyst', pct:17},
+  {name:'Ramadhan', role:'Remote Sensing Analyst', pct:15},
+  {name:'Victor Del Val', role:'Software Developer', pct:9},
+  {name:'Liliana Gonzalez', role:'Remote Sensing Analyst', pct:15}
+];
+
+const ROLE_BY_NAME = Object.fromEntries(TEAM.map(t=>[t.name,t.role]));
+
+// Per-work-package personnel hours, inverted from Table E.5 (Key Personnel allocation) in the revised WPDs.
+// Hours are TOTAL planned hours for the whole work package, not a monthly figure — the WPDs don't break allocation down by month.
+const WP_PERSONNEL = {
+  WP1100:[['Alexander Gunkel',200],['Federico Franciamore',160],['Mathieu Aillerie',20],['Lisa Browkhuizen',20]],
+  WP1200:[['Alexander Gunkel',20],['Federico Franciamore',200],['Mathieu Aillerie',20],['Lisa Browkhuizen',40],['Ramadhan',20],['Liliana Gonzalez',20]],
+  WP1300:[['Alexander Gunkel',40],['Federico Franciamore',200],['Mathieu Aillerie',80],['Lisa Browkhuizen',160],['Ramadhan',200],['Victor Del Val',40],['Liliana Gonzalez',160]],
+  WP2100:[['Alexander Gunkel',100],['Federico Franciamore',40],['Mathieu Aillerie',200],['Lisa Browkhuizen',20]],
+  WP2200:[['Alexander Gunkel',40],['Federico Franciamore',40],['Mathieu Aillerie',160],['Lisa Browkhuizen',20]],
+  WP2300:[['Alexander Gunkel',40],['Federico Franciamore',40],['Mathieu Aillerie',160],['Lisa Browkhuizen',20]],
+  WP3100:[['Alexander Gunkel',20],['Federico Franciamore',260],['Mathieu Aillerie',20],['Lisa Browkhuizen',40],['Ramadhan',40],['Victor Del Val',40],['Liliana Gonzalez',20]],
+  WP3200:[['Federico Franciamore',120],['Mathieu Aillerie',20],['Lisa Browkhuizen',20]],
+  WP3300:[['Federico Franciamore',200],['Mathieu Aillerie',40],['Lisa Browkhuizen',40],['Ramadhan',40],['Victor Del Val',20],['Liliana Gonzalez',20]],
+  WP4100:[['Alexander Gunkel',100],['Federico Franciamore',20],['Mathieu Aillerie',200]],
+  WP4200:[['Alexander Gunkel',40],['Federico Franciamore',20],['Mathieu Aillerie',80]],
+  WP4300:[['Alexander Gunkel',40],['Federico Franciamore',40],['Mathieu Aillerie',80]],
+  WP4400:[['Federico Franciamore',40],['Mathieu Aillerie',20]],
+  WP5100:[['Federico Franciamore',20],['Lisa Browkhuizen',40],['Ramadhan',80],['Victor Del Val',40],['Liliana Gonzalez',80]],
+  WP5200:[['Lisa Browkhuizen',20],['Ramadhan',80],['Victor Del Val',20],['Liliana Gonzalez',80]],
+  WP5300:[['Federico Franciamore',20],['Lisa Browkhuizen',40],['Ramadhan',20],['Victor Del Val',100]],
+  WP5400:[['Federico Franciamore',20],['Lisa Browkhuizen',20],['Ramadhan',40],['Victor Del Val',40],['Liliana Gonzalez',80]],
+  WP6100:[['Federico Franciamore',80],['Mathieu Aillerie',20],['Lisa Browkhuizen',40]],
+  WP6200:[['Federico Franciamore',40],['Mathieu Aillerie',20],['Liliana Gonzalez',40]],
+  WP6300:[['Federico Franciamore',80],['Mathieu Aillerie',40],['Lisa Browkhuizen',20]],
+  WP7100:[['Alexander Gunkel',20],['Federico Franciamore',40],['Mathieu Aillerie',20]],
+  WP7200:[['Alexander Gunkel',40],['Federico Franciamore',40],['Mathieu Aillerie',20]],
+  WP7300:[['Federico Franciamore',40],['Mathieu Aillerie',100]],
+  WP7400:[['Alexander Gunkel',40],['Federico Franciamore',80],['Mathieu Aillerie',120],['Lisa Browkhuizen',20]]
+};
+
+/* ================= HELPERS ================= */
+function fmtDate(iso){
+  const d = new Date(iso+'T00:00:00');
+  return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+}
+function daysBetween(a,b){ return Math.round((b-a)/86400000); }
+const REAL_TODAY = new Date(new Date().toDateString());
+let TODAY = new Date(REAL_TODAY);
+
+/* ================= STORAGE ================= */
+const STORAGE_KEY = 'georegula-deliverable-tracking';
+let trackingState = {};
+
+async function loadTracking(){
+  try{
+    const res = await window.storage.get(STORAGE_KEY, false);
+    trackingState = res && res.value ? JSON.parse(res.value) : {};
+  }catch(e){ trackingState = {}; }
+}
+async function saveTracking(){
+  try{ await window.storage.set(STORAGE_KEY, JSON.stringify(trackingState), false); }
+  catch(e){ console.error('save failed', e); }
+}
+function getStatus(id, fallback){
+  return (trackingState[id] && trackingState[id].status) || fallback;
+}
+function getNotes(id){
+  return (trackingState[id] && trackingState[id].notes) || '';
+}
+function setField(id, field, value){
+  trackingState[id] = trackingState[id] || {};
+  trackingState[id][field] = value;
+  saveTracking();
+}
+
+/* ================= RENDER: TIMELINE ================= */
+function renderTimeline(){
+  const el = document.getElementById('timeline');
+  el.innerHTML = '<div class="tl-line"></div><div class="tl-line-fill" id="tl-fill"></div>';
+  const first = new Date(MILESTONES[0].date), last = new Date(MILESTONES[MILESTONES.length-1].date);
+  const totalSpan = last - first;
+  let progressPct = Math.max(0, Math.min(100, (TODAY-first)/totalSpan*100));
+
+  let nextMilestone = MILESTONES.find(m => new Date(m.date) >= TODAY);
+  if(!nextMilestone) nextMilestone = MILESTONES[MILESTONES.length-1];
+  document.getElementById('stat-nextname').textContent = nextMilestone.id;
+  document.getElementById('stat-nextdays').textContent = Math.max(0,daysBetween(TODAY, new Date(nextMilestone.date)));
+
+  MILESTONES.forEach(m=>{
+    const d = new Date(m.date);
+    const isDone = d < TODAY;
+    const isNow = nextMilestone.id === m.id;
+    const node = document.createElement('div');
+    node.className = 'tl-node';
+    node.innerHTML = `
+      <div class="tl-dot ${isDone?'done':''} ${isNow?'now':''}"></div>
+      <div class="tl-id">${m.id}</div>
+      <div class="tl-date mono">${fmtDate(m.date)}${m.time?' · '+m.time:''}${m.est?' *':''}</div>
+      <div class="tl-tag ${m.payment? 'pay':'est'}">${m.payment ? '€'+m.payment.toLocaleString() : (m.est?'estimated':'fixed')}</div>
+    `;
+    el.appendChild(node);
+  });
+  document.getElementById('tl-fill').style.width = progressPct+'%';
+  document.getElementById('today-label').textContent = `Today — ${TODAY.toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'})}. * = estimated date, not fixed in the contract.`;
+}
+
+/* ================= RENDER: OVERVIEW ================= */
+function renderOverview(){
+  const cards = document.getElementById('overview-cards');
+  const nextMilestone = MILESTONES.find(m => new Date(m.date) >= TODAY) || MILESTONES[MILESTONES.length-1];
+  const daysToNext = Math.max(0,daysBetween(TODAY, new Date(nextMilestone.date)));
+
+  const dueSoon = DELIVERABLES.filter(d=>{
+    const dd = new Date(d.dueDate); const diff = daysBetween(TODAY, dd);
+    return diff >= 0 && diff <= 60;
+  }).length;
+  const overdue = DELIVERABLES.filter(d=>{
+    const status = getStatus(d.id, d.defaultStatus);
+    return new Date(d.dueDate) < TODAY && status!=='Submitted' && status!=='Approved';
+  }).length;
+  const paidSoFar = MILESTONES.filter(m=>m.payment && new Date(m.date)<TODAY)
+    .reduce((a,m)=>a+(m.payment-(m.offset||0)),0)
+    + (new Date(ADVANCE_PAYMENT.date)<TODAY ? ADVANCE_PAYMENT.amount : 0);
+
+  cards.innerHTML = `
+    <div class="card"><div class="k">Next review</div><div class="v">${nextMilestone.id}</div><div class="d">${nextMilestone.name} · ${fmtDate(nextMilestone.date)} · in ${daysToNext} days</div></div>
+    <div class="card accent-amber"><div class="k">Deliverables due ≤60 days</div><div class="v">${dueSoon}</div><div class="d">across all open milestones</div></div>
+    <div class="card accent-coral"><div class="k">Overdue / unresolved</div><div class="v">${overdue}</div><div class="d">past due date, not marked submitted</div></div>
+    <div class="card accent-teal"><div class="k">ESA funding released (net)</div><div class="v">€${paidSoFar.toLocaleString()}</div><div class="d">of €299,760 total contract value</div></div>
+  `;
+
+  const payCards = document.getElementById('payment-cards');
+  const msNumbers = {CDR:'MS1', FAT:'MS2', SAT:'MS3', FR:'MS4'};
+  const advPassed = new Date(ADVANCE_PAYMENT.date) <= TODAY;
+  let payHtml = `<div class="wp-card">
+      <div class="wp-top"><span class="wp-id">ADVANCE</span><span class="wp-hours">${advPassed?'PAID':'PENDING'}</span></div>
+      <div class="wp-title">Advance Payment</div>
+      <div class="wp-meta"><span>€${ADVANCE_PAYMENT.amount.toLocaleString()}</span><span class="mono">Upon signature</span></div>
+    </div>`;
+  payHtml += MILESTONES.filter(m=>m.payment).map(m=>{
+    const passed = new Date(m.date) < TODAY;
+    const net = m.payment - (m.offset||0);
+    return `<div class="wp-card">
+      <div class="wp-top"><span class="wp-id">${msNumbers[m.id]||m.id} · ${m.id}</span><span class="wp-hours">${passed?'PAID':'PENDING'}</span></div>
+      <div class="wp-title">${m.name}</div>
+      <div class="wp-meta"><span>€${m.payment.toLocaleString()}${m.offset?` <span style="color:var(--ink-faint)">(net €${net.toLocaleString()})</span>`:''}</span><span class="mono">${fmtDate(m.date)}</span></div>
+    </div>`;
+  }).join('');
+  payCards.innerHTML = payHtml;
+
+  const upcoming = document.getElementById('upcoming-list');
+  const items = DELIVERABLES
+    .map(d=>({...d, days: daysBetween(TODAY, new Date(d.dueDate))}))
+    .filter(d=> d.days>=0 && d.days<=60)
+    .sort((a,b)=>a.days-b.days);
+  upcoming.innerHTML = items.length ? `<table class="dtable"><tbody>${items.map(d=>`
+    <tr><td style="width:32%"><span class="did">${d.id}</span> &nbsp;<span class="dname">${d.name}</span></td>
+    <td style="width:20%" class="ddue">${d.due}</td>
+    <td style="width:18%" class="ddue">${fmtDate(d.dueDate)}</td>
+    <td><span class="badge ${d.days<=14?'soon':'ok'}">${d.days} day${d.days===1?'':'s'} out</span></td></tr>
+  `).join('')}</tbody></table>` : `<p style="color:var(--ink-dim);font-size:13px;">Nothing due in the next 60 days.</p>`;
+}
+
+/* ================= RENDER: DELIVERABLES ================= */
+function statusBadgeClass(status, dueDate){
+  const overdue = new Date(dueDate) < TODAY && status!=='Submitted' && status!=='Approved';
+  if(overdue) return 'overdue';
+  const days = daysBetween(TODAY, new Date(dueDate));
+  if(days>=0 && days<=21 && status!=='Submitted' && status!=='Approved') return 'soon';
+  return 'ok';
+}
+
+function renderDeliverables(){
+  const msSelect = document.getElementById('d-filter-milestone');
+  if(msSelect.options.length<=1){
+    MILESTONES.forEach(m=>{
+      const opt = document.createElement('option'); opt.value=m.id; opt.textContent=m.id;
+      msSelect.appendChild(opt);
+    });
+  }
+  const search = document.getElementById('d-search').value.toLowerCase();
+  const msFilter = msSelect.value;
+  const statusFilter = document.getElementById('d-filter-status').value;
+
+  let list = DELIVERABLES.filter(d=>{
+    if(search && !(d.name.toLowerCase().includes(search) || d.id.toLowerCase().includes(search))) return false;
+    if(msFilter && !d.due.includes(msFilter)) return false;
+    const status = getStatus(d.id, d.defaultStatus);
+    if(statusFilter && status!==statusFilter) return false;
+    return true;
+  }).sort((a,b)=> new Date(a.dueDate) - new Date(b.dueDate));
+
+  const tbody = document.getElementById('d-tbody');
+  tbody.innerHTML = list.map(d=>{
+    const status = getStatus(d.id, d.defaultStatus);
+    const notes = getNotes(d.id);
+    const badgeClass = statusBadgeClass(status, d.dueDate);
+    const badgeLabel = badgeClass==='overdue' ? 'Overdue' : badgeClass==='soon' ? 'Due soon' : '';
+    return `
+    <tr>
+      <td><span class="did">${d.id}</span><div class="dname">${d.name}</div><div class="ddesc"><span class="dtag">${d.cat}</span>${badgeLabel?`<span class="badge ${badgeClass}">${badgeLabel}</span>`:''}</div></td>
+      <td class="ddue">${d.due}</td>
+      <td class="ddue">${fmtDate(d.dueDate)}</td>
+      <td style="font-size:12px;color:var(--ink-dim);">${d.cadence}</td>
+      <td>
+        <select class="status-select" data-id="${d.id}">
+          ${['Not started','In progress','Submitted','Approved'].map(s=>`<option ${s===status?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </td>
+      <td><textarea class="notes" data-id="${d.id}" placeholder="Add a note…">${notes}</textarea></td>
+    </tr>`;
+  }).join('');
+
+  tbody.querySelectorAll('.status-select').forEach(sel=>{
+    sel.addEventListener('change', e=>{
+      setField(e.target.dataset.id, 'status', e.target.value);
+      renderDeliverables(); renderOverview();
+    });
+  });
+  tbody.querySelectorAll('.notes').forEach(ta=>{
+    ta.addEventListener('blur', e=> setField(e.target.dataset.id, 'notes', e.target.value));
+  });
+}
+
+/* ================= RENDER: WORK PACKAGES ================= */
+function renderWorkPackages(){
+  const container = document.getElementById('wp-container');
+  container.innerHTML = PHASES.map(phase=>{
+    const wps = phase.wps.map(id=>({id, ...WORK_PACKAGES[id]}));
+    const start = wps.reduce((min,w)=> w.start<min?w.start:min, wps[0].start);
+    const end = wps.reduce((max,w)=> w.end>max?w.end:max, wps[0].end);
+    return `
+    <div class="phase-block">
+      <div class="phase-head">
+        <span class="phase-dot" style="background:${phase.color}"></span>
+        <span class="phase-name">${phase.name}</span>
+        <span class="phase-range">${fmtDate(start)} → ${fmtDate(end)}</span>
+      </div>
+      <div class="wp-grid">
+        ${wps.map(w=>`
+          <div class="wp-card wp-expandable" data-wp="${w.id}">
+            <div class="wp-top"><span class="wp-id">${w.id}</span><span class="wp-hours">${w.hours}h</span></div>
+            <div class="wp-title">${w.title}${w.changed?' <span class="wp-changed">revised</span>':''}</div>
+            <div class="wp-meta"><span class="wp-manager">${w.manager}</span><span class="mono">${w.startLabel} → ${w.endLabel}</span></div>
+            ${w.changed?`<div class="wp-changed-note">${w.changed}</div>`:''}
+            <div class="wp-detail">
+              <div class="wp-detail-h">Tasks</div>
+              <ul>${w.tasks.map(t=>`<li>${t}</li>`).join('')}</ul>
+              <div class="wp-detail-h">Outputs</div>
+              <ul>${w.outputs.map(o=>`<li>${o}</li>`).join('')}</ul>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+  }).join('');
+
+  document.querySelectorAll('.wp-expandable').forEach(card=>{
+    card.addEventListener('click', ()=> card.classList.toggle('open'));
+  });
+}
+
+/* ================= RENDER: TEAM ================= */
+function renderTeam(){
+  const container = document.getElementById('team-container');
+  container.innerHTML = TEAM.map(t=>`
+    <div class="team-card">
+      <div class="name">${t.name}</div>
+      <div class="role">${t.role}</div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${t.pct}%"></div></div>
+      <div class="pct">${t.pct}% average allocation over 24 months</div>
+    </div>
+  `).join('');
+}
+
+/* ================= RENDER: GANTT ================= */
+function renderGantt(){
+  const rangeStart = new Date(MILESTONES[1].date); // KOM
+  const rangeEnd = new Date(MILESTONES[MILESTONES.length-1].date); // FR
+  const totalDays = daysBetween(rangeStart, rangeEnd);
+  const pct = d => Math.max(0, Math.min(100, daysBetween(rangeStart, new Date(d)) / totalDays * 100));
+
+  // Legend
+  const legend = document.getElementById('gantt-legend');
+  legend.innerHTML = PHASES.map(p=>`<span class="item"><span class="sw" style="background:${p.color}"></span>${p.name}</span>`).join('') +
+    `<span class="item"><span class="sw" style="background:var(--amber)"></span>Milestone (estimated)</span>` +
+    `<span class="item"><span class="sw" style="background:var(--teal)"></span>Milestone (elapsed)</span>`;
+
+  // Month scale: one tick per month from rangeStart to rangeEnd
+  const ticks = [];
+  let cursor = new Date(rangeStart.getFullYear(), rangeStart.getMonth(), 1);
+  while(cursor <= rangeEnd){
+    ticks.push(new Date(cursor));
+    cursor = new Date(cursor.getFullYear(), cursor.getMonth()+1, 1);
+  }
+  const scaleHtml = ticks.map(t=>{
+    const left = pct(isoDate(t));
+    const label = t.toLocaleDateString('en-GB',{month:'short',year:'2-digit'});
+    return `<div class="gantt-tick" style="left:${left}%"><span>${label}</span></div>`;
+  }).join('');
+
+  // Milestone overlay lines
+  const msHtml = MILESTONES.slice(1).map(m=>{ // skip NM (before range)
+    const left = pct(m.date);
+    const past = new Date(m.date) < TODAY;
+    return `<div class="gantt-mline ${past?'fixed-past':''}" style="left:${left}%"></div>
+            <div class="gantt-mlabel" style="left:${left}%">${m.id}</div>`;
+  }).join('');
+
+  // Phase + WP rows
+  const rowsHtml = PHASES.map(phase=>{
+    const wpRows = phase.wps.map(id=>{
+      const w = WORK_PACKAGES[id];
+      const left = pct(w.start);
+      const width = Math.max(0.6, pct(w.end) - left);
+      return `<div class="gantt-row">
+        <div class="gantt-label"><span class="id">${id}</span>${w.title}</div>
+        <div class="gantt-track"><div class="gantt-bar" title="${id}: ${fmtDate(w.start)} → ${fmtDate(w.end)}" style="left:${left}%;width:${width}%;background:${phase.color}"></div></div>
+      </div>`;
+    }).join('');
+    return `<div class="gantt-phase-row"><div class="gantt-phase-label"><span class="gantt-phase-dot" style="background:${phase.color}"></span>${phase.name}</div></div>${wpRows}`;
+  }).join('');
+
+  document.getElementById('gantt-inner').innerHTML = `
+    <div class="gantt-scale">${scaleHtml}</div>
+    <div class="gantt-milestones">${msHtml}</div>
+    ${rowsHtml}
+  `;
+}
+
+/* ================= RENDER: MONTHLY ACTIVITIES ================= */
+const WP_PHASE = {};
+PHASES.forEach(p=> p.wps.forEach(id=> WP_PHASE[id]=p));
+
+const MONTHLY_STATUS_KEY = 'georegula-monthly-status';
+let monthlyStatus = {};
+async function loadMonthlyStatus(){
+  try{
+    const res = await window.storage.get(MONTHLY_STATUS_KEY, false);
+    monthlyStatus = res && res.value ? JSON.parse(res.value) : {};
+  }catch(e){ monthlyStatus = {}; }
+}
+async function saveMonthlyStatus(){
+  try{ await window.storage.set(MONTHLY_STATUS_KEY, JSON.stringify(monthlyStatus), false); }
+  catch(e){ console.error('monthly status save failed', e); }
+}
+
+function buildMonthList(){
+  const kom = new Date(MILESTONES.find(m=>m.id==='KOM').date);
+  const fr = new Date(MILESTONES.find(m=>m.id==='FR').date);
+  const months = [];
+  let cursor = new Date(kom.getFullYear(), kom.getMonth(), 1);
+  const end = new Date(fr.getFullYear(), fr.getMonth(), 1);
+  let idx = 0;
+  while(cursor <= end){
+    const key = `${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,'0')}`;
+    months.push({key, label: cursor.toLocaleDateString('en-GB',{month:'long',year:'numeric'}), monthIndex: idx, start:new Date(cursor), end:new Date(cursor.getFullYear(),cursor.getMonth()+1,0)});
+    cursor = new Date(cursor.getFullYear(), cursor.getMonth()+1, 1);
+    idx++;
+  }
+  return months;
+}
+const MONTH_LIST = buildMonthList();
+
+function currentMonthKey(){
+  const y = TODAY.getFullYear(), m = TODAY.getMonth();
+  const key = `${y}-${String(m+1).padStart(2,'0')}`;
+  return MONTH_LIST.some(mo=>mo.key===key) ? key : MONTH_LIST[0].key;
+}
+
+function populateMonthSelect(selectedKey){
+  const sel = document.getElementById('month-select');
+  sel.innerHTML = MONTH_LIST.map(mo=>`<option value="${mo.key}" ${mo.key===selectedKey?'selected':''}>${mo.label} (T0+${mo.monthIndex})</option>`).join('');
+}
+
+function renderMonthly(monthKey){
+  const mo = MONTH_LIST.find(m=>m.key===monthKey) || MONTH_LIST[0];
+  populateMonthSelect(mo.key);
+
+  const activeWPs = Object.keys(WORK_PACKAGES).filter(id=>{
+    const w = WORK_PACKAGES[id];
+    return new Date(w.start) <= mo.end && new Date(w.end) >= mo.start;
+  });
+
+  // Stats
+  const peopleSet = new Set();
+  activeWPs.forEach(id => (WP_PERSONNEL[id]||[]).forEach(([name])=>peopleSet.add(name)));
+  const totalWpHours = activeWPs.reduce((a,id)=>a+WORK_PACKAGES[id].hours,0);
+  const msInMonth = MILESTONES.filter(m=> new Date(m.date)>=mo.start && new Date(m.date)<=mo.end);
+
+  document.getElementById('monthly-stats').innerHTML = `
+    <div class="card"><div class="k">Active work packages</div><div class="v">${activeWPs.length}</div><div class="d">running during ${mo.label}</div></div>
+    <div class="card"><div class="k">Personnel involved</div><div class="v">${peopleSet.size}</div><div class="d">of 7 key personnel</div></div>
+    <div class="card"><div class="k">Total WP labour (full duration)</div><div class="v">${totalWpHours}h</div><div class="d">planned hours for active WPs, not month-specific</div></div>
+    <div class="card ${msInMonth.length?'accent-amber':''}"><div class="k">Milestones this month</div><div class="v">${msInMonth.length?msInMonth.map(m=>m.id).join(', '):'—'}</div><div class="d">${msInMonth.length?msInMonth.map(m=>fmtDate(m.date)).join(', '):'none scheduled'}</div></div>
+  `;
+
+  const list = document.getElementById('monthly-wp-list');
+  if(activeWPs.length===0){
+    list.innerHTML = `<div class="month-empty">No work packages scheduled for ${mo.label}.</div>`;
+    return;
+  }
+
+  list.innerHTML = activeWPs.map(id=>{
+    const w = WORK_PACKAGES[id];
+    const phase = WP_PHASE[id];
+    const statusKey = `${mo.key}:${id}`;
+    const status = monthlyStatus[statusKey] || 'Not started';
+    const people = (WP_PERSONNEL[id]||[]).map(([name,hrs])=>`
+      <div class="mo-person">
+        <div><div class="pname">${name}</div><div class="prole">${ROLE_BY_NAME[name]||''}</div></div>
+        <div class="phrs">${hrs}h total</div>
+      </div>`).join('');
+    return `
+    <div class="mo-card">
+      <div class="mo-top">
+        <div>
+          <div class="mo-title-row"><span class="mo-phase-dot" style="background:${phase.color}"></span><span class="mo-id">${id}</span></div>
+          <div class="mo-title">${w.title}</div>
+          <div class="mo-manager">Manager: ${w.manager} · ${w.startLabel} → ${w.endLabel} · ${fmtDate(w.start)} – ${fmtDate(w.end)}</div>
+        </div>
+        <select class="status-select mo-status-select" data-key="${statusKey}">
+          ${['Not started','On track','At risk','Delayed','Completed'].map(s=>`<option ${s===status?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </div>
+      <div class="mo-body">
+        <div class="mo-tasks">
+          <div class="mo-h">Planned activities</div>
+          <div class="mo-checklist">
+            ${w.tasks.map((t,i)=>{
+              const taskKey = `${mo.key}:${id}:t${i}`;
+              const hlKey = `${mo.key}:${id}:h${i}`;
+              const checked = !!monthlyStatus[taskKey];
+              const highlighted = !!monthlyStatus[hlKey];
+              return `<div class="mo-check-row">
+                <input type="checkbox" class="mo-task-check" data-key="${taskKey}" ${checked?'checked':''}>
+                <span class="mo-task-text ${checked?'mo-check-done':''} ${highlighted?'mo-task-bold':''}" data-hkey="${hlKey}" data-wp="${id}" data-text="${t.replace(/"/g,'&quot;')}">${t}</span>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>
+        <div>
+          <div class="mo-h">Personnel dedicated (total WP hours)</div>
+          <div class="mo-people">${people || '<span style="font-size:12px;color:var(--ink-faint);">No personnel data</span>'}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  list.querySelectorAll('.mo-task-check').forEach(cb=>{
+    cb.addEventListener('change', e=>{
+      monthlyStatus[e.target.dataset.key] = e.target.checked;
+      saveMonthlyStatus();
+      const span = e.target.nextElementSibling;
+      span.classList.toggle('mo-check-done', e.target.checked);
+    });
+  });
+
+  list.querySelectorAll('.mo-task-text').forEach(span=>{
+    span.addEventListener('click', e=>{
+      const key = e.currentTarget.dataset.hkey;
+      const nowOn = !monthlyStatus[key];
+      monthlyStatus[key] = nowOn;
+      saveMonthlyStatus();
+      e.currentTarget.classList.toggle('mo-task-bold', nowOn);
+      renderRecap(mo.key);
+    });
+  });
+
+  list.querySelectorAll('.mo-status-select').forEach(sel=>{
+    sel.addEventListener('change', e=>{
+      monthlyStatus[e.target.dataset.key] = e.target.value;
+      saveMonthlyStatus();
+    });
+  });
+
+  renderRecap(mo.key);
+}
+
+function renderRecap(monthKey){
+  const mo = MONTH_LIST.find(m=>m.key===monthKey);
+  const recap = document.getElementById('monthly-recap');
+  const activeWPs = Object.keys(WORK_PACKAGES).filter(id=>{
+    const w = WORK_PACKAGES[id];
+    return new Date(w.start) <= mo.end && new Date(w.end) >= mo.start;
+  });
+  const items = [];
+  activeWPs.forEach(id=>{
+    WORK_PACKAGES[id].tasks.forEach((t,i)=>{
+      const hlKey = `${mo.key}:${id}:h${i}`;
+      if(monthlyStatus[hlKey]) items.push({id, text:t});
+    });
+  });
+  recap.innerHTML = items.length
+    ? items.map(it=>`<div class="recap-item"><span class="recap-wp">${it.id}</span><span class="recap-text">${it.text}</span></div>`).join('')
+    : `<div class="recap-empty">No activities highlighted yet for ${mo.label}. Click any activity above to add it here.</div>`;
+}
+
+document.getElementById('month-select').addEventListener('change', e=> renderMonthly(e.target.value));
+document.getElementById('month-prev').addEventListener('click', ()=>{
+  const cur = document.getElementById('month-select').value;
+  const i = MONTH_LIST.findIndex(m=>m.key===cur);
+  if(i>0) renderMonthly(MONTH_LIST[i-1].key);
+});
+document.getElementById('month-next').addEventListener('click', ()=>{
+  const cur = document.getElementById('month-select').value;
+  const i = MONTH_LIST.findIndex(m=>m.key===cur);
+  if(i>=0 && i<MONTH_LIST.length-1) renderMonthly(MONTH_LIST[i+1].key);
+});
+
+/* ================= TABS ================= */
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-'+tab.dataset.tab).classList.add('active');
+  });
+});
+document.getElementById('d-search').addEventListener('input', renderDeliverables);
+document.getElementById('d-filter-milestone').addEventListener('change', renderDeliverables);
+document.getElementById('d-filter-status').addEventListener('change', renderDeliverables);
+
+/* ================= CLOCK CONTROL ================= */
+const SIMDATE_KEY = 'georegula-sim-date';
+
+function isoDate(d){
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+
+async function loadSimDate(){
+  try{
+    const res = await window.storage.get(SIMDATE_KEY, false);
+    if(res && res.value){
+      const parsed = new Date(res.value+'T00:00:00');
+      if(!isNaN(parsed)) TODAY = parsed;
+    }
+  }catch(e){ /* no override saved yet */ }
+}
+async function saveSimDate(dateStr){
+  try{ await window.storage.set(SIMDATE_KEY, dateStr, false); }
+  catch(e){ console.error('sim-date save failed', e); }
+}
+async function clearSimDate(){
+  try{ await window.storage.delete(SIMDATE_KEY, false); }
+  catch(e){ /* nothing stored */ }
+}
+
+function renderAll(){
+  renderTimeline();
+  renderOverview();
+  renderDeliverables();
+  renderGantt();
+  updateClockNote();
+}
+
+function updateClockNote(){
+  document.getElementById('clock-input').value = isoDate(TODAY);
+  const note = document.getElementById('clock-note');
+  if(isoDate(TODAY) !== isoDate(REAL_TODAY)){
+    const diff = daysBetween(REAL_TODAY, TODAY);
+    note.textContent = `Simulated — ${diff>0?'+':''}${diff} day${Math.abs(diff)===1?'':'s'} from the real date (${fmtDate(isoDate(REAL_TODAY))}). Milestones, statuses and the Gantt chart above are recalculated against this date.`;
+    note.classList.add('shifted');
+  } else {
+    note.textContent = 'Using the real current date.';
+    note.classList.remove('shifted');
+  }
+}
+
+document.getElementById('clock-input').addEventListener('change', e=>{
+  if(!e.target.value) return;
+  TODAY = new Date(e.target.value+'T00:00:00');
+  saveSimDate(e.target.value);
+  renderAll();
+});
+document.getElementById('clock-today').addEventListener('click', ()=>{
+  TODAY = new Date(REAL_TODAY);
+  clearSimDate();
+  renderAll();
+});
+
+/* ================= INIT ================= */
+(async function init(){
+  await loadTracking();
+  await loadSimDate();
+  await loadMonthlyStatus();
+  renderTimeline();
+  renderOverview();
+  renderDeliverables();
+  renderWorkPackages();
+  renderGantt();
+  renderMonthly(currentMonthKey());
+  renderTeam();
+  updateClockNote();
+})();
+</script>
+</body>
+</html>
